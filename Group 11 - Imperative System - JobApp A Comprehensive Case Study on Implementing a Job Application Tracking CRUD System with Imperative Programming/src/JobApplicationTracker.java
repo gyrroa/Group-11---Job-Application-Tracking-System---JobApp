@@ -116,6 +116,7 @@ public class JobApplicationTracker {
 		 * 5 applied_date
 		 * 6 interview_date
 		*/
+    	appInfo[6] = null;
     	System.out.println("\n\t\u001B[33m|------- Enter applicant details -------|\u001B[37m");
 		sc.nextLine();
 		
@@ -152,67 +153,67 @@ public class JobApplicationTracker {
 				+"\n\t\t4 - "+status[3]
 				+"\n\t\t5 - "+status[4]);
 		System.out.print("\n\t\tSelect: ");
+		
 		int choice = sc.nextInt();
-		for(int i = 0; i<5; i++) {
-			if(choice == i) {
-				appInfo[5] = status[i-1];
-			}else if(choice == 5) {
-				System.out.print("\n\tEnter custom status:");
-				appInfo[5] = sc.next();
-				break;
-			}else if(choice == 2) {
-				System.out.print("\n\tEnter interview date (yyyy-mm-dd): ");
-				appInfo[5] = status[1];
-				appInfo[6] = sc.next();
-				break;
-			}else
-			{
-				System.out.println("\n\tError: Invalid Input");
-				break;
-			}
-		}
-		// check if interviewDate is not null
-		try {
-		    if (appInfo[6] != null) {
-		        // Try to parse the input date string
-		        interviewDate = java.sql.Date.valueOf(appInfo[6]);
-		        long start = System.currentTimeMillis();
-				try {
-				    con = GetCon();
-				    stmt = con.createStatement();
-				    
-				    query = "INSERT INTO tbl_applicant (applicant_first_name,"
-				            + " applicant_last_name,"
-				            + " phone_number,"
-				            + " email_address,"
-				            + " position,"
-				            + " application_status,"
-				            + " applied_date,"
-				            + " interview_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-
-				    PreparedStatement pstmt = con.prepareStatement(query);
-
-				    pstmt.setString(1, appInfo[0]); // First name
-				    pstmt.setString(2, appInfo[1]); // Last name
-				    pstmt.setString(3, appInfo[2]); // Phone number
-				    pstmt.setString(4, appInfo[3]); // Email address
-				    pstmt.setString(5, appInfo[4]); // Position
-				    pstmt.setString(6, appInfo[5]); // Application status
-				    pstmt.setDate(7, applyDate); // Date applied
-				    pstmt.setDate(8, interviewDate); // Interview date
-
-				    pstmt.executeUpdate();
-				    con.close();
-				    System.out.println("\n\tApplicant added successfully");
-				} catch (SQLException e) {
-				    System.out.println("Error: Failed to insert data: " + e.getMessage());
-				}
-				long end = System.currentTimeMillis();
-				long elapsedTime = end-start;
-			    System.out.printf("\n\tExecution time: (%.3f sec)\n", elapsedTime/1000.0);
+		if ((choice >= 1) && (choice <= 5)) {
+		    if (choice == 5) {
+		        System.out.print("\n\tEnter custom status: ");
+		        appInfo[5] = sc.next();
+		    } else if (choice == 2) {
+		        System.out.print("\n\tEnter interview date (yyyy-mm-dd): ");
+		        appInfo[5] = status[1];
+		        appInfo[6] = sc.next();
+		    } else {
+		        appInfo[5] = status[choice - 1];
 		    }
+		} else {
+		    System.out.println("\n\tError: Invalid Input");
+		}
+
+		try {
+		    if (appInfo[6] == null) {
+		    	interviewDate = null;
+		    }else {
+		    	interviewDate = java.sql.Date.valueOf(appInfo[6]);
+		    }
+	        long start = System.currentTimeMillis();
+	        
+			try {
+			    con = GetCon();
+			    stmt = con.createStatement();
+			    
+			    query = "INSERT INTO tbl_applicant (applicant_first_name,"
+			            + " applicant_last_name,"
+			            + " phone_number,"
+			            + " email_address,"
+			            + " position,"
+			            + " application_status,"
+			            + " applied_date,"
+			            + " interview_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+
+			    PreparedStatement pstmt = con.prepareStatement(query);
+
+			    pstmt.setString(1, appInfo[0]); // First name
+			    pstmt.setString(2, appInfo[1]); // Last name
+			    pstmt.setString(3, appInfo[2]); // Phone number
+			    pstmt.setString(4, appInfo[3]); // Email address
+			    pstmt.setString(5, appInfo[4]); // Position
+			    pstmt.setString(6, appInfo[5]); // Application status
+			    pstmt.setDate(7, applyDate); // Date applied
+			    pstmt.setDate(8, interviewDate); // Interview date
+
+			    pstmt.executeUpdate();
+			    con.close();
+			    System.out.println("\n\tApplicant added successfully");
+			} catch (SQLException e) {
+			    System.out.println("Error: Failed to insert data: " + e.getMessage());
+			}
+			long end = System.currentTimeMillis();
+			long elapsedTime = end-start;
+		    System.out.printf("\n\tExecution time: (%.3f sec)\n", elapsedTime/1000.0);
+		    
 		} catch (IllegalArgumentException e) {
-		    System.out.println("\n\tError: Input date format is incorrect. Please use the format 'yyyy-MM-dd'.");
+		    System.out.println("\n\tError: Input date format is incorrect. Please use the format 'yyyy-MM-dd'."+e);
 		}
 		System.out.println("\n\t\u001B[33m|---------------------------------------|\u001B[37m");
     }
